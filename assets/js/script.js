@@ -23,7 +23,9 @@ jQuery(document).ready(function($) {
                     var html = '';
 
                     $.each(response, function(index, value) {
-                        html += `<tr><td>${ value.label }</td><td>R$ ${ value.cost.replace('.', ',') }</td><td>Entrega em ${ value.delivery_forecast } dias úteis</td></tr>`;
+						var delivery_forecast = value.delivery_forecast ? `Entrega em ${ value.delivery_forecast } dias úteis` : '-';
+						
+                        html += `<tr><td>${ value.label }</td><td>R$ ${ value.cost.replace('.', ',') }</td><td>${ delivery_forecast }</td></tr>`;
                     });
 
                     $('#mscpp-calculator .result table tbody').html(html);

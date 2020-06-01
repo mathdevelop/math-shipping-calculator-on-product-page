@@ -24,7 +24,9 @@ function mscpp_calculate() {
         $variation_data = wc_get_product_variation_attributes($variation_id);
     }
 
-    $cart = new WC_Cart();
+    $cart = clone WC()->cart;
+	
+	$cart->empty_cart();
 
     $cart->add_to_cart($_POST['product'], $_POST['quantity'], $variation_id, $variation_data);
 
@@ -35,7 +37,23 @@ function mscpp_calculate() {
     $shipping_method = [];
 
     foreach($rates as $rate) {
-        $shipping_method[] = ['label' => $rate->get_label(), 'cost' => $rate->get_cost(), 'delivery_forecast' => $rate->get_meta_data()['_delivery_forecast'] ?? ''];
+		$label = $rate->get_label();
+		$delivery_forecast = $rate->get_meta_data()['_delivery_forecast'] ?? '';
+		
+		if(empty($delivery_forecast)) {
+			$custom_label = explode(' (', $label, 2);
+			
+			if(count($custom_label) > 1) {
+				$custom_delivery_forecast = preg_replace('/[^0-9]/', '', $custom_label[1]);
+				
+				if(!empty($custom_delivery_forecast)) {
+					$label = $custom_label[0];
+					$delivery_forecast = $custom_delivery_forecast;
+				}
+			}
+		}
+		
+        $shipping_method[] = ['label' => $label, 'cost' => $rate->get_cost(), 'delivery_forecast' =>  $delivery_forecast];
     }
 
     echo json_encode($shipping_method);
